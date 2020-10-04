@@ -30,9 +30,6 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 Camera camera(glm::vec3(0.0f, 6.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, -60.0f);
-bool firstMouse = true;
-float lastX = SCREEN_WIDTH / 2.0;
-float lastY = SCREEN_HEIGHT / 2.0;
 
 Snake snake;
 
@@ -61,7 +58,6 @@ int main()
 		std::cout << "FAILED TO INITIALIZE GLAD" << std::endl;
 		return -1;
 	}
-	
 	glEnable(GL_DEPTH_TEST);
 
 	Shader shader("SnakeGameVertexShader.vs", "SnakeGameFragmentShader.fs");
@@ -167,14 +163,12 @@ int main()
 	glEnableVertexAttribArray(1);
 
 
-
-
 	stbi_set_flip_vertically_on_load(true);
-	unsigned int boxTex1, boxTex2, snakeTex, randomBodyTex;
+	unsigned int boxTex1, boxTex2, snakeTex, addBodyTex;
 	MakeTexture(boxTex1, "resources/tile1.jpg");
 	MakeTexture(boxTex2, "resources/tile2.jpg");
 	MakeTexture(snakeTex, "resources/brownBox.jpg");
-	MakeTexture(randomBodyTex, "resources/YellowBox.jpg");
+	MakeTexture(addBodyTex, "resources/YellowBox.jpg");
 
 	shader.use();
 	shader.setInt("texture1", 0);
@@ -190,7 +184,7 @@ int main()
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, snakeTex);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, randomBodyTex);
+	glBindTexture(GL_TEXTURE_2D, addBodyTex);
 
 	// Snake Initialization
 	std::vector<Pos> snakeBodyContainer;
@@ -202,7 +196,6 @@ int main()
 	lastPos.y += 1;
 	float frame = 0.0f, oneSec = 0.0f;
 	bool getBoxFlag = false;
-	
 	snakeBodyContainer.push_back(lastPos);
 
 
@@ -213,11 +206,11 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		frame += deltaTime;
+		oneSec += deltaTime;
 
 		ProcessInput(window);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -255,8 +248,6 @@ int main()
 			}
 		}
 
-
-
 		glm::vec3 nextVec = SetPosToVec(nextPos);
 		glm::vec3 curVec = SetPosToVec(curPos);
 		glm::vec3 lastVec = SetPosToVec(lastPos);
@@ -279,7 +270,6 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		oneSec += deltaTime;
 
 		if (frame >= FRAME_RATE)
 		{
@@ -315,7 +305,6 @@ int main()
 					GameOver(window);
 				}
 			}
-
 			// 추가 몸통 충돌체크 
 			glm::vec3 genVec = SetPosToVec(genPos);
 			if (CheckHeadCollision(genVec, headingVec, snakeDirection))
@@ -455,7 +444,6 @@ Pos GenerateSnakeBody(std::vector<Pos>& snakePos)
 		srand(static_cast<unsigned int>(time(NULL)));
 		int xPos = rand() % 11;
 		int yPos = rand() % 11;
-
 		for (size_t i = 0; i < snakePos.size(); i++)
 		{
 			if (snakePos[i].x == xPos && snakePos[i].y == yPos)
